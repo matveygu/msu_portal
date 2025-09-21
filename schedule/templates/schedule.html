@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Расписание - МГУ ВМК{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/schedule.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="container schedule-container mt-4">
+    <div class="card">
+        <div class="card-header schedule-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4>Расписание занятий - {{ user.group.name }}</h4>
+                <span class="badge bg-primary">Курс: {{ user.course }}</span>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <!-- Навигация по неделям -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="?date={{ previous_week }}" class="btn btn-outline-primary">
+                            ← Предыдущая неделя
+                        </a>
+                        <h5 class="mb-0">Неделя {{ week_dates.0|date:"d.m" }} - {{ week_dates.6|date:"d.m" }}</h5>
+                        <a href="?date={{ next_week }}" class="btn btn-outline-primary">
+                            Следующая неделя →
+                        </a>
+                    </div>
+                    
+                    <!-- Дни недели -->
+                    <div class="nav nav-pills justify-content-center mt-3 day-nav-pills">
+                        {% for week_date in week_dates %}
+                        <a class="nav-link {% if week_date == current_date %}active{% endif %}" 
+                           href="?date={{ week_date|date:'Y-m-d' }}">
+                            {{ week_date|date:"l" }}<br>
+                            <small>{{ week_date|date:"d.m" }}</small>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            {% if error %}
+            <div class="alert alert-warning">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <!-- Расписание на день -->
+            <div class="table-responsive">
+                <table class="table table-hover schedule-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width: 10%">№ пары</th>
+                            <th style="width: 15%">Время</th>
+                            <th style="width: 35%">Предмет / Преподаватель / Аудитория</th>
+                            <th style="width: 40%">Домашнее задание</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lesson in schedule %}
+                        <tr>
+                            <td class="fw-bold lesson-number">{{ lesson.lesson_number }}</td>
+                            <td class="lesson-time">{{ lesson.time }}</td>
+                            <td>
+                                <div class="fw-bold lesson-subject">{{ lesson.subject.name }}</div>
+                                <div class="text-muted small">{{ lesson.subject.teacher.get_full_name }}</div>
+                                <div class="text-muted small">Ауд.: {{ lesson.classroom }}</div>
+                            </td>
+                            <td>
+                                {% if lesson.homework %}
+                                <div class="homework-content">
+                                    <div class="homework-text">{{ lesson.homework }}</div>
+                                    
+                                    {% if lesson.homework_file %}
+                                    <div class="mt-2">
+                                        <a href="{{ lesson.homework_file.url }}" 
+                                           class="btn btn-sm btn-outline-primary download-btn"
+                                           target="_blank">
+                                            <i class="fas fa-file-download"></i> Скачать файл
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if lesson.homework_date %}
+                                    <small class="text-muted d-block mt-1">
+                                        Задано: {{ lesson.homework_date|date:"d.m.Y" }}
+                                    </small>
+                                    {% endif %}
+                                    
+                                    {% if user.role in 'headman teacher admin' %}
+                                    <button class="btn btn-sm btn-outline-secondary mt-2" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editHomeworkModal{{ lesson.id }}">
+                                        ✏️ Редактировать
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                {% else %}
+                                {% if user.role in 'headman teacher admin' %}
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#editHomeworkModal{{ lesson.id }}">
+                                    ➕ Добавить ДЗ
+                                </button>
+                                {% else %}
+                                <span class="text-muted">ДЗ не задано</span>
+                                {% endif %}
+                                {% endif %}
+
+                                <!-- Модальное окно редактирования ДЗ -->
+                                {% if user.role in 'headman teacher admin' %}
+                                <div class="modal fade" id="editHomeworkModal{{ lesson.id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Домашнее задание</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form method="post" action="{% url 'add_homework' lesson.id %}" enctype="multipart/form-data">
+                                                {% csrf_token %}
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Предмет: {{ lesson.subject.name }}</label>
+                                                        <textarea name="homework" class="form-control" 
+                                                                  rows="4" placeholder="Введите домашнее задание...">{{ lesson.homework }}</textarea>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Файл задания</label>
+                                                        <input type="file" name="homework_file" class="form-control">
+                                                        {% if lesson.homework_file %}
+                                                        <div class="mt-2">
+                                                            <small>Текущий файл: {{ lesson.homework_file.name }}</small>
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Дата задания</label>
+                                                        <input type="date" name="homework_date" 
+                                                               value="{{ lesson.homework_date|date:'Y-m-d' }}" 
+                                                               class="form-control">
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 no-lessons">
+                                <i class="fas fa-calendar-times fa-3x mb-3"></i>
+                                <p>Занятий на этот день нет 🎉</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+/* Home page specific styles */
+.welcome-card {
+    background: linear-gradient(135deg, #0039a6 0%, #0053b3 100%);
+    color: white;
+    border: none;
+    border-radius: 15px;
+}
+
+.welcome-card h2 {
+    font-weight: 300;
+}
+
+.quick-action-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.quick-action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    text-decoration: none;
+}
+
+.quick-action-card .card-body {
+    padding: 1.5rem;
+}
+
+.quick-action-card i {
+    margin-bottom: 1rem;
+}
+
+.news-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+}
+
+.news-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.useful-links .list-group-item {
+    border: none;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.useful-links .list-group-item:hover {
+    border-left-color: #0039a6;
+    background-color: #f8f9fa;
+}
+
+.schedule-alert {
+    border: none;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .quick-action-card .card-body {
+        padding: 1rem;
+    }
+
+    .quick-action-card i {
+        font-size: 2rem !important;
+    }
+}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Загрузка материала - МГУ ВМК{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>📤 Загрузка учебного материала</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Название материала</label>
+                                    {{ form.name }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Тип материала</label>
+                                    {{ form.type }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Факультет</label>
+                                    {{ form.faculty }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Курс</label>
+                                    {{ form.course }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Предмет</label>
+                            {{ form.subject }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Выберите папку</label>
+                            {{ form.folder }}
+                            <small class="form-text text-muted">Или создайте новую папку ниже</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Создать новую папку</label>
+                            {{ form.new_folder }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Файл</label>
+                            {{ form.file }}
+                            <div class="form-text">Максимальный размер: 50MB</div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">📤 Загрузить материал</button>
+                            <a href="{% url 'materials' %}" class="btn btn-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

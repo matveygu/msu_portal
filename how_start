@@ -1,0 +1,8 @@
+# Создайте миграции
+python manage.py makemigrations
+
+# Примените миграции
+python manage.py migrate
+
+# Перезапустите сервер
+python manage.py runserver

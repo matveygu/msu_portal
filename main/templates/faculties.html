@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Факультеты МГУ - МГУ ВМК{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/faculties.css' %}" rel="stylesheet">
+<style>
+.faculty-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.faculty-card:hover {
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.faculty-card .card-header {
+    background: linear-gradient(135deg, #0039a6 0%, #0053b3 100%);
+    color: white;
+    border-radius: 15px 15px 0 0 !important;
+    cursor: pointer;
+    padding: 1.5rem;
+    border: none;
+}
+
+.faculty-card .card-header h5 {
+    margin: 0;
+    font-weight: 500;
+}
+
+.faculty-card .card-body {
+    padding: 2rem;
+    background: white;
+    border-radius: 0 0 15px 15px;
+}
+
+.faculty-info {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-top: 1.5rem;
+}
+
+.faculty-image {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-right: 1.5rem;
+}
+
+.points-badge {
+    font-size: 1.1em;
+    padding: 0.5em 1em;
+}
+
+.login-promo {
+    background: linear-gradient(135deg, #0039a6 0%, #0053b3 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    text-align: center;
+    margin-top: 3rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold text-primary mb-3">Факультеты МГУ</h1>
+        <p class="lead text-muted">Московский государственный университет имени М.В. Ломоносова</p>
+    </div>
+
+    {% for faculty in faculties %}
+    <div class="card faculty-card">
+        <div class="card-header" onclick="toggleFaculty({{ faculty.id }})">
+            <div class="d-flex align-items-center">
+                {% if faculty.image %}
+                <img src="{{ faculty.image }}" alt="{{ faculty.name }}" class="faculty-image">
+                {% endif %}
+                <div>
+                    <h5 class="mb-1">{{ faculty.name }} - {{ faculty.full_name }}</h5>
+                    <small>Нажмите для подробной информации</small>
+                </div>
+                <i class="fas fa-chevron-down ms-auto faculty-arrow" id="arrow-{{ faculty.id }}"></i>
+            </div>
+        </div>
+        <div class="card-body faculty-content" id="faculty-{{ faculty.id }}" style="display: none;">
+            <div class="row">
+                <div class="col-md-8">
+                    <h6 class="text-primary">Описание</h6>
+                    <p class="faculty-description">{{ faculty.description }}</p>
+                </div>
+                <div class="col-md-4">
+                    <div class="faculty-info">
+                        <h6 class="text-primary">Информация для абитуриентов</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span>Проходной балл (2023):</span>
+                            <span class="badge bg-primary points-badge">{{ faculty.points }}</span>
+                        </div>
+                        <a href="{{ faculty.website }}" target="_blank" class="btn btn-outline-primary w-100 mb-2">
+                            <i class="fas fa-external-link-alt"></i> Официальный сайт
+                        </a>
+                        <a href="{% url 'login' %}" class="btn btn-primary w-100">
+                            <i class="fas fa-graduation-cap"></i> Войти как студент
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="login-promo">
+        <h3>Уже учитесь в МГУ?</h3>
+        <p class="mb-3">Войдите в систему для доступа к расписанию, материалам и учебным ресурсам</p>
+        <a href="{% url 'login' %}" class="btn btn-light btn-lg">
+            <i class="fas fa-sign-in-alt"></i> Войти в систему
+        </a>
+    </div>
+</div>
+
+<script>
+function toggleFaculty(id) {
+    const content = document.getElementById('faculty-' + id);
+    const arrow = document.getElementById('arrow-' + id);
+
+    if (content.style.display === 'none' || !content.style.display) {
+        content.style.display = 'block';
+        arrow.className = 'fas fa-chevron-up ms-auto faculty-arrow';
+    } else {
+        content.style.display = 'none';
+        arrow.className = 'fas fa-chevron-down ms-auto faculty-arrow';
+    }
+}
+
+// Вешаем обработчики на все заголовки факультетов
+document.addEventListener('DOMContentLoaded', function() {
+    const facultyHeaders = document.querySelectorAll('.faculty-card .card-header');
+    facultyHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const facultyId = this.getAttribute('onclick').match(/\d+/)[0];
+            toggleFaculty(facultyId);
+        });
+    });
+
+    // Автоматически открыть первый факультет на десктопе
+    if (window.innerWidth > 768 && facultyHeaders.length > 0) {
+        const firstFacultyId = facultyHeaders[0].getAttribute('onclick').match(/\d+/)[0];
+        toggleFaculty(firstFacultyId);
+    }
+});
+</script>
+{% endblock %}
