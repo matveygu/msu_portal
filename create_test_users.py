@@ -18,12 +18,12 @@ def create_test_data():
 
     # 1. Создаем группы
     groups_data = [
-        {"name": "ВМК-101", "faculty": "ВМК", "course": 1},
-        {"name": "ВМК-102", "faculty": "ВМК", "course": 1},
-        {"name": "ВМК-201", "faculty": "ВМК", "course": 2},
-        {"name": "ВМК-202", "faculty": "ВМК", "course": 2},
-        {"name": "ВМК-301", "faculty": "ВМК", "course": 3},
     ]
+    for i in range(1, 7):
+        for j in range(1, 21):
+            if j < 10:
+                j = "0" + str(j)
+            groups_data.append({"name": f"ВМК-{i}{j}", "faculty": "ВМК", "course": i})
 
     groups = {}
     for group_data in groups_data:
