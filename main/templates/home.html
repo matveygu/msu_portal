@@ -12,79 +12,217 @@
     <!-- Основной контент -->
     <div class="col-lg-8">
         <!-- Приветствие -->
-        <div class="card welcome-card mb-4">
-            <div class="card-body text-center">
+        <div class="card mb-4">
+            <div class="card-body text-center welcome-card">
                 <h2>Добро пожаловать, {{ user.first_name }}! 👋</h2>
-                <p class="mb-0">Факультет: {{ user.faculty }} | Курс: {{ user.course }} | Группа: {{ user.group.name }}</p>
+                <p class="text-muted">Факультет: {{ user.faculty }} | Курс: {{ user.course }} | Группа: {{ user.group.name }}</p>
+                <p class="text-muted">Сегодня: {{ today|date:"d.m.Y" }}</p>
             </div>
         </div>
 
-        <!-- Быстрый доступ -->
-        <div class="row mb-4">
-            <div class="col-md-4 mb-3">
-                <a href="{% url 'schedule' %}" class="card quick-action-card text-decoration-none text-center">
-                    <div class="card-body">
-                        <i class="fas fa-calendar-alt fa-3x text-primary mb-2"></i>
-                        <h5>Расписание</h5>
-                        <p class="text-muted">Посмотреть занятия</p>
-                    </div>
-                </a>
+        <!-- Ближайшие пары сегодня -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4><i class="fas fa-calendar-day"></i> Пары на сегодня</h4>
             </div>
-            <div class="col-md-4 mb-3">
-                <a href="{% url 'materials' %}" class="card quick-action-card text-decoration-none text-center">
-                    <div class="card-body">
-                        <i class="fas fa-book fa-3x text-success mb-2"></i>
-                        <h5>Материалы</h5>
-                        <p class="text-muted">Учебные ресурсы</p>
-                    </div>
-                </a>
-            </div>
-            <div class="col-md-4 mb-3">
-                <a href="{% url 'profile' %}" class="card quick-action-card text-decoration-none text-center">
-                    <div class="card-body">
-                        <i class="fas fa-user fa-3x text-info mb-2"></i>
-                        <h5>Профиль</h5>
-                        <p class="text-muted">Личные данные</p>
-                    </div>
-                </a>
+            <div class="card-body">
+                {% if today_schedule %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Время</th>
+                                <th>Предмет</th>
+                                <th>Преподаватель</th>
+                                <th>Аудитория</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lesson in today_schedule %}
+                            <tr>
+                                <td class="fw-bold">{{ lesson.time }}</td>
+                                <td>
+                                    <div class="fw-bold">{{ lesson.subject.name }}</div>
+                                    <small class="text-muted">{{ lesson.lesson_number }} пара</small>
+                                </td>
+                                <td>{{ lesson.subject.teacher.get_full_name }}</td>
+                                <td>{{ lesson.classroom }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">На сегодня пар нет 🎉</p>
+                </div>
+                {% endif %}
+
+                <div class="text-center mt-3">
+                    <a href="{% url 'schedule' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-calendar-alt"></i> Полное расписание
+                    </a>
+                </div>
             </div>
         </div>
 
         <!-- Новости и объявления -->
         <div class="card">
-            <div class="card-header">
-                <h4><i class="fas fa-newspaper"></i> Новости и объявления</h4>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0"><i class="fas fa-newspaper"></i> Новости и объявления</h4>
+                {% if user.role in 'admin teacher' %}
+                <a href="{% url 'add_news' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-plus"></i> Добавить новость
+                </a>
+                {% endif %}
             </div>
             <div class="card-body">
+                {% for news in page_obj %}
                 <div class="news-card card mb-3">
                     <div class="card-body">
-                        <h5>📢 Важное объявление</h5>
-                        <p class="text-muted"><small>Сегодня, 10:30</small></p>
-                        <p>Завтра состоится собрание для студентов 2 курса. Присутствие обязательно.</p>
-                    </div>
-                </div>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h5 class="card-title">
+                                    {{ news.title }}
+                                    <span class="badge
+                                        {% if news.category == 'news' %}bg-primary
+                                        {% elif news.category == 'announcement' %}bg-warning
+                                        {% else %}bg-success{% endif %}">
+                                        {{ news.get_category_display }}
+                                    </span>
+                                </h5>
+                                <p class="card-text">{{ news.content }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user"></i> {{ news.author.get_full_name }}
+                                        <i class="fas fa-clock ms-2"></i> {{ news.created_at|date:"d.m.Y H:i" }}
+                                    </small>
+                                    {% if user.role in 'admin teacher' and user == news.author or user.role == 'admin' %}
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'edit_news' news.id %}" class="btn btn-outline-secondary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteNewsModal{{ news.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
 
-                <div class="news-card card mb-3">
-                    <div class="card-body">
-                        <h5>🎓 Защита проектов</h5>
-                        <p class="text-muted"><small>Вчера, 15:45</small></p>
-                        <p>Напоминаем о защите курсовых проектов на следующей неделе. Расписание будет опубликовано завтра.</p>
+                                    <!-- Модальное окно удаления -->
+                                    <div class="modal fade" id="deleteNewsModal{{ news.id }}" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Удаление новости</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Вы уверены, что хотите удалить новость "{{ news.title }}"?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                                    <form method="post" action="{% url 'delete_news' news.id %}">
+                                                        {% csrf_token %}
+                                                        <button type="submit" class="btn btn-danger">Удалить</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if news.image %}
+                            <div class="ms-3">
+                                <img src="{{ news.image.url }}" alt="{{ news.title }}"
+                                     class="img-fluid rounded" style="max-width: 120px;">
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
+                {% empty %}
+                <div class="text-center py-4">
+                    <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Новостей пока нет</p>
+                    {% if user.role in 'admin teacher' %}
+                    <a href="{% url 'add_news' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Добавить первую новость
+                    </a>
+                    {% endif %}
+                </div>
+                {% endfor %}
 
-                <div class="news-card card mb-3">
-                    <div class="card-body">
-                        <h5>📚 Новые материалы</h5>
-                        <p class="text-muted"><small>2 дня назад</small></p>
-                        <p>Добавлены новые лекционные материалы по курсу "Базы данных". Доступно в разделе материалов.</p>
-                    </div>
-                </div>
+                <!-- Пагинация -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Навигация по новостям">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперед</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
             </div>
         </div>
     </div>
 
     <!-- Боковая панель -->
     <div class="col-lg-4">
+        <!-- Быстрый доступ -->
+        <div class="row mb-4">
+            <div class="col-6 mb-3">
+                <a href="{% url 'schedule' %}" class="card quick-action text-decoration-none text-center">
+                    <div class="card-body">
+                        <i class="fas fa-calendar-alt fa-2x text-primary mb-2"></i>
+                        <h6>Расписание</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 mb-3">
+                <a href="{% url 'materials' %}" class="card quick-action text-decoration-none text-center">
+                    <div class="card-body">
+                        <i class="fas fa-book fa-2x text-success mb-2"></i>
+                        <h6>Материалы</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 mb-3">
+                <a href="{% url 'profile' %}" class="card quick-action text-decoration-none text-center">
+                    <div class="card-body">
+                        <i class="fas fa-user fa-2x text-info mb-2"></i>
+                        <h6>Профиль</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 mb-3">
+                <a href="https://mail.msu.ru" class="card quick-action text-decoration-none text-center" target="_blank">
+                    <div class="card-body">
+                        <i class="fas fa-envelope fa-2x text-warning mb-2"></i>
+                        <h6>Почта</h6>
+                    </div>
+                </a>
+            </div>
+        </div>
+
         <!-- Полезные ссылки -->
         <div class="card mb-4">
             <div class="card-header">
@@ -95,14 +233,11 @@
                     <a href="https://www.msu.ru" class="list-group-item list-group-item-action" target="_blank">
                         <i class="fas fa-globe"></i> Официальный сайт МГУ
                     </a>
-                    <a href="https://cs.msu.ru" class="list-group-item list-group-item-action" target="_blank">
-                        <i class="fas fa-laptop-code"></i> Сайт факультета ВМК
+                    <a href="https://webanketa.msu.ru" class="list-group-item list-group-item-action" target="_blank">
+                        <i class="fas fa-user-graduate"></i> Абитуриенту МГУ
                     </a>
                     <a href="https://library.msu.ru" class="list-group-item list-group-item-action" target="_blank">
                         <i class="fas fa-book-open"></i> Библиотека МГУ
-                    </a>
-                    <a href="https://mail.msu.ru" class="list-group-item list-group-item-action" target="_blank">
-                        <i class="fas fa-envelope"></i> Почта МГУ
                     </a>
                     <a href="https://edu.msu.ru" class="list-group-item list-group-item-action" target="_blank">
                         <i class="fas fa-graduation-cap"></i> Портал дистанционного обучения
@@ -111,20 +246,21 @@
             </div>
         </div>
 
-        <!-- Ближайшие пары -->
+        <!-- Статистика -->
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-clock"></i> Ближайшие пары</h5>
+                <h5><i class="fas fa-chart-bar"></i> Статистика</h5>
             </div>
             <div class="card-body">
-                <div class="alert alert-info schedule-alert">
-                    <strong>Сегодня</strong><br>
-                    <small>10:30-12:00 - Программирование (ауд. 505)</small><br>
-                    <small>12:15-13:45 - Математический анализ (ауд. 312)</small>
-                </div>
-                <div class="alert alert-warning schedule-alert">
-                    <strong>Завтра</strong><br>
-                    <small>09:00-10:30 - Базы данных (ауд. 411)</small>
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="h4 text-primary mb-1">{{ page_obj.paginator.count }}</div>
+                        <small class="text-muted">Новостей</small>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <div class="h4 text-success mb-1">{{ today_schedule|length }}</div>
+                        <small class="text-muted">Пар сегодня</small>
+                    </div>
                 </div>
             </div>
         </div>

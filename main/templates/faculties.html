@@ -9,10 +9,60 @@
 
 {% block content %}
 <div class="container faculties-container mt-4">
+
+    <!-- Полезные ссылки - ВЕРХ СТРАНИЦЫ -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-link"></i> Полезные ссылки для абитуриентов</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-2 col-sm-4 mb-2">
+                    <a href="https://www.msu.ru" class="btn btn-outline-primary w-100" target="_blank">
+                        <i class="fas fa-globe"></i><br>
+                        <small>Сайт МГУ</small>
+                    </a>
+                </div>
+                <div class="col-md-2 col-sm-4 mb-2">
+                    <a href="https://webanketa.msu.ru" class="btn btn-outline-primary w-100" target="_blank">
+                        <i class="fas fa-user-graduate"></i><br>
+                        <small>Абитуриенту</small>
+                    </a>
+                </div>
+                <div class="col-md-2 col-sm-4 mb-2">
+                    <a href="https://library.msu.ru" class="btn btn-outline-primary w-100" target="_blank">
+                        <i class="fas fa-book-open"></i><br>
+                        <small>Библиотека</small>
+                    </a>
+                </div>
+                <div class="col-md-2 col-sm-4 mb-2">
+                    <a href="https://mail.msu.ru" class="btn btn-outline-primary w-100" target="_blank">
+                        <i class="fas fa-envelope"></i><br>
+                        <small>Почта МГУ</small>
+                    </a>
+                </div>
+                <div class="col-md-2 col-sm-4 mb-2">
+                    <a href="https://edu.msu.ru" class="btn btn-outline-primary w-100" target="_blank">
+                        <i class="fas fa-laptop"></i><br>
+                        <small>обучение</small>
+                    </a>
+                </div>
+                <div class="col-md-2 col-sm-4 mb-2">
+                    <a href="https://cpk.msu.ru" class="btn btn-outline-primary w-100" target="_blank">
+                        <i class="fas fa-info-circle"></i><br>
+                        <small>Приёмная комиссия</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container faculties-container mt-4">
     <div class="text-center mb-5">
         <h1 class="display-4 fw-bold text-primary mb-3">Факультеты МГУ</h1>
         <p class="lead text-muted">Московский государственный университет имени М.В. Ломоносова</p>
     </div>
+
 
     {% for faculty in faculties %}
     <div class="card faculty-card">

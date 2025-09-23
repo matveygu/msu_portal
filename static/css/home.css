@@ -71,3 +71,69 @@
         font-size: 2rem !important;
     }
 }
+
+/* Стили для форм новостей */
+.news-form .form-control {
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.news-form .form-control:focus {
+    border-color: #0039a6;
+    box-shadow: 0 0 0 0.2rem rgba(0, 57, 166, 0.25);
+}
+
+.news-form textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+.news-image-preview {
+    max-width: 200px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для карточек новостей */
+.news-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.news-card:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.news-card .card-body {
+    padding: 1.5rem;
+}
+
+.news-meta {
+    font-size: 0.85em;
+    color: #6c757d;
+}
+
+.news-badge {
+    font-size: 0.75em;
+    padding: 0.35em 0.65em;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+    .news-card .card-body {
+        padding: 1rem;
+    }
+
+    .news-form .row {
+        margin-bottom: 0;
+    }
+
+    .news-form .col-md-6 {
+        margin-bottom: 1rem;
+    }
+}

@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-
 class CustomUser(AbstractUser):
     ROLES = [
         ('student', 'Студент'),
@@ -69,3 +68,33 @@ class Group(models.Model):
         verbose_name = 'Группа'
         verbose_name_plural = 'Группы'
         ordering = ['faculty', 'course', 'name']
+
+class News(models.Model):
+    CATEGORIES = [
+        ('news', 'Новость'),
+        ('announcement', 'Объявление'),
+        ('event', 'Событие'),
+    ]
+
+    title = models.CharField(max_length=200, verbose_name='Заголовок')
+    content = models.TextField(verbose_name='Содержание')
+    category = models.CharField(max_length=20, choices=CATEGORIES, default='news', verbose_name='Категория')
+    author = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='Автор')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+    is_published = models.BooleanField(default=True, verbose_name='Опубликовано')
+    image = models.ImageField(upload_to='news/', blank=True, null=True, verbose_name='Изображение')
+
+    class Meta:
+        verbose_name = 'Новость'
+        verbose_name_plural = 'Новости'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+    def get_short_content(self):
+        """Возвращает укороченное содержание (первые 100 символов)"""
+        if len(self.content) > 100:
+            return self.content[:100] + '...'
+        return self.content
