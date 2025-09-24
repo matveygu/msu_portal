@@ -30,11 +30,11 @@
                             Следующая неделя →
                         </a>
                     </div>
-                    
+
                     <!-- Дни недели -->
                     <div class="nav nav-pills justify-content-center mt-3 day-nav-pills">
                         {% for week_date in week_dates %}
-                        <a class="nav-link {% if week_date == current_date %}active{% endif %}" 
+                        <a class="nav-link {% if week_date == current_date %}active{% endif %}"
                            href="?date={{ week_date|date:'Y-m-d' }}">
                             {{ week_date|date:"l" }}<br>
                             <small>{{ week_date|date:"d.m" }}</small>
@@ -75,26 +75,26 @@
                                 {% if lesson.homework %}
                                 <div class="homework-content">
                                     <div class="homework-text">{{ lesson.homework }}</div>
-                                    
+
                                     {% if lesson.homework_file %}
                                     <div class="mt-2">
-                                        <a href="{{ lesson.homework_file.url }}" 
+                                        <a href="{{ lesson.homework_file.url }}"
                                            class="btn btn-sm btn-outline-primary download-btn"
                                            target="_blank">
                                             <i class="fas fa-file-download"></i> Скачать файл
                                         </a>
                                     </div>
                                     {% endif %}
-                                    
+
                                     {% if lesson.homework_date %}
                                     <small class="text-muted d-block mt-1">
                                         Задано: {{ lesson.homework_date|date:"d.m.Y" }}
                                     </small>
                                     {% endif %}
-                                    
+
                                     {% if user.role in 'headman teacher admin' %}
-                                    <button class="btn btn-sm btn-outline-secondary mt-2" 
-                                            data-bs-toggle="modal" 
+                                    <button class="btn btn-sm btn-outline-secondary mt-2"
+                                            data-bs-toggle="modal"
                                             data-bs-target="#editHomeworkModal{{ lesson.id }}">
                                         ✏️ Редактировать
                                     </button>
@@ -102,8 +102,8 @@
                                 </div>
                                 {% else %}
                                 {% if user.role in 'headman teacher admin' %}
-                                <button class="btn btn-sm btn-outline-primary" 
-                                        data-bs-toggle="modal" 
+                                <button class="btn btn-sm btn-outline-primary"
+                                        data-bs-toggle="modal"
                                         data-bs-target="#editHomeworkModal{{ lesson.id }}">
                                     ➕ Добавить ДЗ
                                 </button>
@@ -126,7 +126,7 @@
                                                 <div class="modal-body">
                                                     <div class="mb-3">
                                                         <label class="form-label">Предмет: {{ lesson.subject.name }}</label>
-                                                        <textarea name="homework" class="form-control" 
+                                                        <textarea name="homework" class="form-control"
                                                                   rows="4" placeholder="Введите домашнее задание...">{{ lesson.homework }}</textarea>
                                                     </div>
                                                     <div class="mb-3">
@@ -140,8 +140,8 @@
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Дата задания</label>
-                                                        <input type="date" name="homework_date" 
-                                                               value="{{ lesson.homework_date|date:'Y-m-d' }}" 
+                                                        <input type="date" name="homework_date"
+                                                               value="{{ lesson.homework_date|date:'Y-m-d' }}"
                                                                class="form-control">
                                                     </div>
                                                 </div>
