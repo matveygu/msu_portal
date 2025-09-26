@@ -78,10 +78,10 @@ def create_test_schedule():
 
     # 4. Расписание
     schedule_data = [
-        {'day': 'monday', 'number': 1, 'time': '9:00-10:30', 'classroom': '505'},
-        {'day': 'monday', 'number': 2, 'time': '10:45-12:15', 'classroom': '312'},
-        {'day': 'tuesday', 'number': 1, 'time': '9:00-10:30', 'classroom': '411'},
-        {'day': 'wednesday', 'number': 1, 'time': '9:00-10:30', 'classroom': '505'},
+        {'day': 'Понедельник', 'number': 1, 'time': '9:00-10:30', 'classroom': '505'},
+        {'day': 'Понедельник', 'number': 2, 'time': '10:45-12:15', 'classroom': '312'},
+        {'day': 'Вторник', 'number': 1, 'time': '9:00-10:30', 'classroom': '411'},
+        {'day': 'Среда', 'number': 1, 'time': '9:00-10:30', 'classroom': '505'},
     ]
 
     for data in schedule_data:
@@ -89,6 +89,7 @@ def create_test_schedule():
             group=group,
             day=data['day'],
             lesson_number=data['number'],
+            teacher_id=teacher.student_id,
             defaults={
                 'time': data['time'],
                 'subject': subject,
