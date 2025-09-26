@@ -1,5 +1,32 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
+from .models import News
+
+class NewsForm(forms.ModelForm):
+    class Meta:
+        model = News
+        fields = ['title', 'content', 'category', 'image', 'is_published']
+        widgets = {
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Введите заголовок новости'
+            }),
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Введите содержание новости'
+            }),
+            'category': forms.Select(attrs={'class': 'form-control'}),
+            'is_published': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+        labels = {
+            'title': 'Заголовок',
+            'content': 'Содержание',
+            'category': 'Категория',
+            'image': 'Изображение',
+            'is_published': 'Опубликовать',
+        }
+
 
 class CustomAuthForm(AuthenticationForm):
     username = forms.CharField(

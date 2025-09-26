@@ -43,6 +43,12 @@ class Schedule(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name='Группа')
     day = models.CharField(max_length=15, choices=DAYS, verbose_name='День недели')
     lesson_number = models.IntegerField(verbose_name='Номер пары')
+    teacher_id = models.CharField(
+        max_length=20,
+        null=True,
+        unique=False,
+        verbose_name='Номер студенческого'
+    )
     time = models.CharField(max_length=20, verbose_name='Время')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, verbose_name='Предмет')
     classroom = models.CharField(max_length=50, verbose_name='Аудитория')
