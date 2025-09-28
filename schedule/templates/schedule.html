@@ -72,11 +72,12 @@
                                 <div class="text-muted small">Ауд.: {{ lesson.classroom }}</div>
                             </td>
                             <td>
-                                {% if lesson.homework %}
+                                {% for dz in homework %}
+                                {% if dz.content and dz.schedule_id == lesson.id %}
                                 <div class="homework-content">
-                                    <div class="homework-text">{{ lesson.homework }}</div>
+                                    <div class="homework-text">{{ dz.content }}</div>
 
-                                    {% if lesson.homework_file %}
+                                    {% if dz.file %}
                                     <div class="mt-2">
                                         <a href="{{ lesson.homework_file.url }}"
                                            class="btn btn-sm btn-outline-primary download-btn"
@@ -86,9 +87,9 @@
                                     </div>
                                     {% endif %}
 
-                                    {% if lesson.homework_date %}
+                                    {% if dz.due_date %}
                                     <small class="text-muted d-block mt-1">
-                                        Задано: {{ lesson.homework_date|date:"d.m.Y" }}
+                                        Задано: {{ dz.assigned_date|date:"d.m.Y" }}
                                     </small>
                                     {% endif %}
 
@@ -98,9 +99,14 @@
                                             data-bs-target="#editHomeworkModal{{ lesson.id }}">
                                         ✏️ Редактировать
                                     </button>
+                                    <form method="post" action="{% url 'delete_homework' dz.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Удалить</button>
+                                    </form>
                                     {% endif %}
                                 </div>
-                                {% else %}
+                                {% endif %}
+                                {% endfor %}
                                 {% if user.role in 'headman teacher admin' %}
                                 <button class="btn btn-sm btn-outline-primary"
                                         data-bs-toggle="modal"
@@ -110,9 +116,8 @@
                                 {% else %}
                                 <span class="text-muted">ДЗ не задано</span>
                                 {% endif %}
-                                {% endif %}
 
-                                <!-- Модальное окно редактирования ДЗ -->
+                                <!-- Модальное окно добавления ДЗ -->
                                 {% if user.role in 'headman teacher admin' %}
                                 <div class="modal fade" id="editHomeworkModal{{ lesson.id }}" tabindex="-1">
                                     <div class="modal-dialog modal-lg">
@@ -123,28 +128,7 @@
                                             </div>
                                             <form method="post" action="{% url 'add_homework' lesson.id %}" enctype="multipart/form-data">
                                                 {% csrf_token %}
-                                                <div class="modal-body">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Предмет: {{ lesson.subject.name }}</label>
-                                                        <textarea name="homework" class="form-control"
-                                                                  rows="4" placeholder="Введите домашнее задание...">{{ lesson.homework }}</textarea>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Файл задания</label>
-                                                        <input type="file" name="homework_file" class="form-control">
-                                                        {% if lesson.homework_file %}
-                                                        <div class="mt-2">
-                                                            <small>Текущий файл: {{ lesson.homework_file.name }}</small>
-                                                        </div>
-                                                        {% endif %}
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Дата задания</label>
-                                                        <input type="date" name="homework_date"
-                                                               value="{{ lesson.homework_date|date:'Y-m-d' }}"
-                                                               class="form-control">
-                                                    </div>
-                                                </div>
+                                                {{ form.as_p }}
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                                                     <button type="submit" class="btn btn-primary">Сохранить</button>

@@ -20,6 +20,8 @@ class Homework(models.Model):
     due_date = models.DateField(blank=True, null=True, verbose_name='Срок сдачи')
     created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='Кем задано')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Время создания')
+    group = models.ForeignKey(Group, null=True, on_delete=models.CASCADE, verbose_name='Группа')
+    subject = models.ForeignKey(Subject, null=True, on_delete=models.CASCADE, verbose_name='Предмет')
 
     class Meta:
         ordering = ['-assigned_date']

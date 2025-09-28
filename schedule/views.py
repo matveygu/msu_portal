@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.http import JsonResponse, FileResponse
 from django.utils import timezone
 from datetime import datetime, timedelta, date
-from .models import Schedule, Subject
+from .models import Schedule, Subject, Homework
 from .forms import HomeworkForm
 
 
@@ -15,7 +15,6 @@ def is_headman_or_above(user):
 @login_required
 def schedule_view(request):
     user_group = request.user.group
-    print(request.user.student_id)
 
     if not user_group and request.user.role != "teacher":
         context = {
@@ -53,11 +52,13 @@ def schedule_view(request):
             group=user_group,
             day=current_day
         ).order_by('lesson_number')
+        homework = Homework.objects.filter(due_date=current_date, group=user_group)
     else:
         schedule = Schedule.objects.filter(
             teacher_id=request.user.student_id,
             day=current_day
         ).order_by('lesson_number')
+        homework = Homework.objects.filter(due_date=current_date, group=user_group)
 
     context = {
         'schedule': schedule,
@@ -66,6 +67,8 @@ def schedule_view(request):
         'current_date_str': current_date.isoformat(),
         'previous_week': previous_week,
         'next_week': next_week,
+        'homework': homework,
+        'form': HomeworkForm(),
     }
     return render(request, 'schedule.html', context)
 
@@ -97,13 +100,18 @@ def add_homework(request, schedule_id):
     schedule = get_object_or_404(Schedule, id=schedule_id)
 
     if request.method == 'POST':
+        print(request.POST)
         form = HomeworkForm(request.POST, request.FILES)
+        print(form.errors)
         if form.is_valid():
             print("Succes")
+            print(schedule.subject)
             homework = form.save(commit=False)
             homework.schedule = schedule
             homework.created_by = request.user
             homework.assigned_date = date.today()  # ⚡ автоматически ставим дату выдачи
+            homework.group = request.user.group
+            homework.subject = schedule.subject
             homework.save()
             return redirect('schedule_detail', schedule_id=schedule.id)
     else:
@@ -162,3 +170,14 @@ def schedule_detail(request, schedule_id):
         'schedule': schedule,
         'homeworks': homeworks
     })
+
+@login_required
+@user_passes_test(is_headman_or_above)
+def delete_homework(request, schedule_id):
+    print(schedule_id)
+    schedule = get_object_or_404(Homework, id=schedule_id)
+    print(schedule.due_date)
+    if request.method == 'POST':
+        schedule.delete()
+        messages.success(request, 'Домашка успешно удалена')
+    return redirect(f'/schedule/?date={schedule.due_date}')
