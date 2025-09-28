@@ -59,10 +59,34 @@ def create_test_schedule():
     else:
         print("⚠️ Преподаватель уже существует")
 
+    # 1. Преподаватель
+    teacher2, created = CustomUser.objects.get_or_create(
+    username='teacher2',
+    defaults={
+            'student_id': 't0001',
+            'first_name': 'Никитин',
+            'last_name': 'АА',
+            'faculty': 'ВМК',
+            'course': 0,
+            'role': 'teacher'
+        }
+    )
+    if created:
+        teacher2.set_password('teacher123')
+        teacher2.save()
+        print("✅ Преподаватель создан")
+    else:
+        print("⚠️ Преподаватель уже существует")
+
     # 2. Предмет
     subject, created = Subject.objects.get_or_create(
         name='Программирование',
         teacher=teacher
+    )
+    print("✅ Предмет создан" if created else "⚠️ Предмет уже существует")
+    subject2, created = Subject.objects.get_or_create(
+        name='Математический анализ',
+        teacher=teacher2
     )
     print("✅ Предмет создан" if created else "⚠️ Предмет уже существует")
 
@@ -78,10 +102,12 @@ def create_test_schedule():
 
     # 4. Расписание
     schedule_data = [
-        {'day': 'Понедельник', 'number': 1, 'time': '9:00-10:30', 'classroom': '505'},
-        {'day': 'Понедельник', 'number': 2, 'time': '10:45-12:15', 'classroom': '312'},
-        {'day': 'Вторник', 'number': 1, 'time': '9:00-10:30', 'classroom': '411'},
-        {'day': 'Среда', 'number': 1, 'time': '9:00-10:30', 'classroom': '505'},
+        {'day': 'Понедельник', 'number': 1, 'time': '9:00-10:30', 'classroom': '505', "teacher_id": teacher.student_id, "subject": subject},
+        {'day': 'Понедельник', 'number': 2, 'time': '10:45-12:15', 'classroom': '312', "teacher_id": teacher.student_id, "subject": subject},
+        {'day': 'Вторник', 'number': 1, 'time': '9:00-10:30', 'classroom': '411', "teacher_id": teacher.student_id, "subject": subject},
+        {'day': 'Среда', 'number': 1, 'time': '9:00-10:30', 'classroom': '505', "teacher_id": teacher2.student_id, "subject": subject2},
+        {'day': 'Вторник', 'number': 4, 'time': '14:40-16:10', 'classroom': '411', "teacher_id": teacher2.student_id, "subject": subject2},
+        {'day': 'Четверг', 'number': 1, 'time': '9:00-10:30', 'classroom': '505', "teacher_id": teacher2.student_id, "subject": subject2},
     ]
 
     for data in schedule_data:
@@ -89,10 +115,10 @@ def create_test_schedule():
             group=group,
             day=data['day'],
             lesson_number=data['number'],
-            teacher_id=teacher.student_id,
+            teacher_id=data['teacher_id'],
             defaults={
                 'time': data['time'],
-                'subject': subject,
+                'subject': data['subject'],
                 'classroom': data['classroom']
             }
         )

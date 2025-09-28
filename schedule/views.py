@@ -93,28 +93,26 @@ def day_schedule(request, day):
 @login_required
 @user_passes_test(is_headman_or_above)
 def add_homework(request, schedule_id):
-    schedule_item = get_object_or_404(Schedule, id=schedule_id)
-    user = request.user
-    if user.role == 'headman' and schedule_item.group != user.group:
-        messages.error(request, "Вы можете добавлять ДЗ только для своей группы")
-        return redirect('schedule')
+    """Добавление домашнего задания для конкретной пары"""
+    schedule = get_object_or_404(Schedule, id=schedule_id)
 
-    if user.role == 'teacher' and schedule_item.subject.teacher != user:
-        messages.error(request, "Вы можете добавлять ДЗ только для своих предметов")
-        return redirect('schedule')
     if request.method == 'POST':
-        form = HomeworkForm(request.POST, request.FILES, instance=schedule_item)
+        form = HomeworkForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Домашнее задание успешно сохранено")
-            return redirect('schedule')
+            print("Succes")
+            homework = form.save(commit=False)
+            homework.schedule = schedule
+            homework.created_by = request.user
+            homework.assigned_date = date.today()  # ⚡ автоматически ставим дату выдачи
+            homework.save()
+            return redirect('schedule_detail', schedule_id=schedule.id)
     else:
-        form = HomeworkForm(instance=schedule_item)
-    context = {
+        form = HomeworkForm()
+
+    return render(request, 'add_homework.html', {
         'form': form,
-        'schedule_item': schedule_item
-    }
-    return render(request, 'add_homework.html', context)
+        'schedule': schedule
+    })
 
 @login_required
 def download_homework_file(request, schedule_id):
@@ -155,3 +153,12 @@ def schedule_json(request, day=None):
         })
 
     return JsonResponse({'schedule': schedule_data})
+
+@login_required
+def schedule_detail(request, schedule_id):
+    schedule = get_object_or_404(Schedule, id=schedule_id)
+    homeworks = schedule.homework_assignments.all()
+    return render(request, 'schedule/schedule_detail.html', {
+        'schedule': schedule,
+        'homeworks': homeworks
+    })

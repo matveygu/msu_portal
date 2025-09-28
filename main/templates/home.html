@@ -15,8 +15,8 @@
         <div class="card mb-4">
             <div class="card-body text-center welcome-card">
                 <h2>Добро пожаловать, {{ user.first_name }}! 👋</h2>
-                <p class="text-muted">Факультет: {{ user.faculty }} | Курс: {{ user.course }} | Группа: {{ user.group.name }}</p>
-                <p class="text-muted">Сегодня: {{ today|date:"d.m.Y" }}</p>
+                <p class="text-light-muted">Факультет: {{ user.faculty }} | Курс: {{ user.course }} | Группа: {{ user.group.name }}</p>
+                <p class="text-light-muted">Сегодня: {{ today|date:"d.m.Y" }}</p>
             </div>
         </div>
 
