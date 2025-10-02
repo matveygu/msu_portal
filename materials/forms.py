@@ -1,5 +1,5 @@
 from django import forms
-from .models import Material
+from .models import Material, MaterialFolder
 
 
 class MaterialUploadForm(forms.ModelForm):

@@ -102,16 +102,17 @@ def create_test_schedule():
 
     # 4. Расписание
     schedule_data = [
-        {'day': 'Понедельник', 'number': 1, 'time': '9:00-10:30', 'classroom': '505', "teacher_id": teacher.student_id, "subject": subject},
-        {'day': 'Понедельник', 'number': 2, 'time': '10:45-12:15', 'classroom': '312', "teacher_id": teacher.student_id, "subject": subject},
-        {'day': 'Вторник', 'number': 1, 'time': '9:00-10:30', 'classroom': '411', "teacher_id": teacher.student_id, "subject": subject},
-        {'day': 'Среда', 'number': 1, 'time': '9:00-10:30', 'classroom': '505', "teacher_id": teacher2.student_id, "subject": subject2},
-        {'day': 'Вторник', 'number': 4, 'time': '14:40-16:10', 'classroom': '411', "teacher_id": teacher2.student_id, "subject": subject2},
-        {'day': 'Четверг', 'number': 1, 'time': '9:00-10:30', 'classroom': '505', "teacher_id": teacher2.student_id, "subject": subject2},
+        {'day': 'Понедельник', 'number': 1, 'time': '9:00-10:30', "faculty": "ВМК", 'classroom': '505', "teacher_id": teacher.student_id, "subject": subject},
+        {'day': 'Понедельник', 'number': 2, 'time': '10:45-12:15', "faculty": "ВМК", 'classroom': '312', "teacher_id": teacher.student_id, "subject": subject},
+        {'day': 'Вторник', 'number': 1, 'time': '9:00-10:30', "faculty": "ВМК", 'classroom': '411', "teacher_id": teacher.student_id, "subject": subject},
+        {'day': 'Среда', 'number': 1, 'time': '9:00-10:30', "faculty": "ВМК", 'classroom': '505', "teacher_id": teacher2.student_id, "subject": subject2},
+        {'day': 'Вторник', 'number': 4, 'time': '14:40-16:10', "faculty": "ВМК", 'classroom': '411', "teacher_id": teacher2.student_id, "subject": subject2},
+        {'day': 'Четверг', 'number': 1, 'time': '9:00-10:30', "faculty": "ВМК", 'classroom': '505', "teacher_id": teacher2.student_id, "subject": subject2},
     ]
 
     for data in schedule_data:
         schedule, created = Schedule.objects.get_or_create(
+            faculty=data['faculty'],
             group=group,
             day=data['day'],
             lesson_number=data['number'],

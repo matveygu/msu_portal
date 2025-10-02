@@ -47,8 +47,10 @@ def schedule_view(request):
     }
     current_day = days_map.get(current_date.weekday(), 'monday')
     # Расписание на текущий день
+    print(request.user.faculty)
     if request.user.role != "teacher":
         schedule = Schedule.objects.filter(
+            faculty=request.user.faculty,
             group=user_group,
             day=current_day
         ).order_by('lesson_number')

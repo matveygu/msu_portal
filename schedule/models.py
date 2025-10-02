@@ -34,22 +34,23 @@ class Homework(models.Model):
 
 class Schedule(models.Model):
     DAYS = [
-        ('monday', 'Понедельник'),
-        ('tuesday', 'Вторник'),
-        ('wednesday', 'Среда'),
-        ('thursday', 'Четверг'),
-        ('friday', 'Пятница'),
-        ('saturday', 'Суббота'),
-    ]
+    ('Понедельник', 'Понедельник'),
+    ('Вторник', 'Вторник'),
+    ('Среда', 'Среда'),
+    ('Четверг', 'Четверг'),
+    ('Пятница', 'Пятница'),
+    ('Суббота', 'Суббота'),
+]
 
+    faculty = models.CharField(max_length=100, null=True, verbose_name='Факультет')
     group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name='Группа')
     day = models.CharField(max_length=15, choices=DAYS, verbose_name='День недели')
     lesson_number = models.IntegerField(verbose_name='Номер пары')
     teacher_id = models.CharField(
-        max_length=20,
+        max_length=50,
         null=True,
         unique=False,
-        verbose_name='Номер студенческого'
+        verbose_name='ID Преподавателя'
     )
     time = models.CharField(max_length=20, verbose_name='Время')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, verbose_name='Предмет')
