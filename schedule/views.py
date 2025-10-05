@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
@@ -60,7 +61,7 @@ def schedule_view(request):
             teacher_id=request.user.student_id,
             day=current_day
         ).order_by('lesson_number')
-        homework = Homework.objects.filter(due_date=current_date, group=user_group)
+        homework = Homework.objects.filter(due_date=current_date)
 
     context = {
         'schedule': schedule,
@@ -102,7 +103,6 @@ def add_homework(request, schedule_id):
     schedule = get_object_or_404(Schedule, id=schedule_id)
 
     if request.method == 'POST':
-        print(request.POST)
         form = HomeworkForm(request.POST, request.FILES)
         print(form.errors)
         if form.is_valid():
@@ -112,7 +112,7 @@ def add_homework(request, schedule_id):
             homework.schedule = schedule
             homework.created_by = request.user
             homework.assigned_date = date.today()  # ⚡ автоматически ставим дату выдачи
-            homework.group = request.user.group
+            homework.group = schedule.group
             homework.subject = schedule.subject
             homework.save()
             return redirect('schedule_detail', schedule_id=schedule.id)
@@ -179,7 +179,10 @@ def delete_homework(request, schedule_id):
     print(schedule_id)
     schedule = get_object_or_404(Homework, id=schedule_id)
     print(schedule.due_date)
+    print(schedule.file)
     if request.method == 'POST':
+        if os.path.isfile(f"media/{schedule.file}"):
+            os.remove(f"media/{schedule.file}")
         schedule.delete()
         messages.success(request, 'Домашка успешно удалена')
     return redirect(f'/schedule/?date={schedule.due_date}')
