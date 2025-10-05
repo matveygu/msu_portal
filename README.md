@@ -2,9 +2,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg?logo=python)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-5.0+-success.svg?logo=django)](https://www.djangoproject.com/)
-[![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-Active-brightgreen.svg)]()
-[![Contributions](https://img.shields.io/badge/contributions-welcome-orange.svg)]()
 
 ---
 
