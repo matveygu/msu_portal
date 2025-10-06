@@ -168,7 +168,7 @@ def schedule_json(request, day=None):
 def schedule_detail(request, schedule_id):
     schedule = get_object_or_404(Schedule, id=schedule_id)
     homeworks = schedule.homework_assignments.all()
-    return render(request, 'schedule/schedule_detail.html', {
+    return render(request, 'schedule_detail.html', {
         'schedule': schedule,
         'homeworks': homeworks
     })

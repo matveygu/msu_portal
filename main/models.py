@@ -83,7 +83,7 @@ class News(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
     is_published = models.BooleanField(default=True, verbose_name='Опубликовано')
-    image = models.ImageField(upload_to='news/', blank=True, null=True, verbose_name='Изображение')
+    file = models.FileField(upload_to='news/', blank=True, null=True, verbose_name='Файл')
 
     class Meta:
         verbose_name = 'Новость'

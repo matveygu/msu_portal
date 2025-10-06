@@ -1,4 +1,4 @@
-from django.core.checks import messages
+from django.contrib import messages
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, FileResponse
@@ -154,9 +154,22 @@ def download_material(request, material_id):
     material = get_object_or_404(Material, id=material_id)
     file_path = os.path.join(settings.MEDIA_ROOT, str(material.file))
 
-    if os.path.exists(file_path):
-        response = FileResponse(open(file_path, 'rb'))
+    if material.file:
+        response = FileResponse(material.file.open(), as_attachment=True)
         response['Content-Disposition'] = f'attachment; filename="{material.file.name}"'
         return response
     else:
+        messages.error(request, "Файл не найден")
         return HttpResponse("Файл не найден", status=404)
+
+@login_required
+@user_passes_test(is_headman_or_above)
+def delete_material(request, material_id):
+    material = get_object_or_404(Material, id=material_id)
+    print(material.file)
+    if request.method == 'POST':
+        if os.path.isfile(f"media/{material.file}"):
+            os.remove(f"media/{material.file}")
+        material.delete()
+        messages.success(request, 'Домашка успешно удалена')
+    return redirect(f'/materials')

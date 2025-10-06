@@ -5,7 +5,7 @@ from .models import News
 class NewsForm(forms.ModelForm):
     class Meta:
         model = News
-        fields = ['title', 'content', 'category', 'image', 'is_published']
+        fields = ['title', 'content', 'category', 'file', 'is_published']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -23,7 +23,7 @@ class NewsForm(forms.ModelForm):
             'title': 'Заголовок',
             'content': 'Содержание',
             'category': 'Категория',
-            'image': 'Изображение',
+            'file': 'Файл',
             'is_published': 'Опубликовать',
         }
 

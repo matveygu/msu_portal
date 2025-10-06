@@ -1,5 +1,6 @@
 import json
 import os
+from django.http import FileResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -61,7 +62,7 @@ def get_default_faculties():
             'website': 'https://cs.msu.ru',
             'contact': 'vmk@cs.msu.ru',
             'phone': '+7 (495) 939-54-01',
-            'local_logo': 'data/faculties/vmk.png'
+            'local_logo': 'data/faculties/1.png'
         }
     ]
 
@@ -145,10 +146,12 @@ def add_news(request):
 def edit_news(request, news_id):
     """Редактирование новости"""
     news = get_object_or_404(News, id=news_id)
-
+    file = news.file
     if request.method == 'POST':
         form = NewsForm(request.POST, request.FILES, instance=news)
         if form.is_valid():
+            if os.path.isfile(f"media/{file}"):
+                os.remove(f"media/{file}")
             form.save()
             messages.success(request, 'Новость успешно обновлена')
             return redirect('home')
@@ -164,6 +167,19 @@ def delete_news(request, news_id):
     """Удаление новости"""
     news = get_object_or_404(News, id=news_id)
     if request.method == 'POST':
+        if os.path.isfile(f"media/{news.file}"):
+            os.remove(f"media/{news.file}")
         news.delete()
         messages.success(request, 'Новость успешно удалена')
     return redirect('home')
+
+@login_required
+def download_news(request, news_id):
+    news = get_object_or_404(News, id=news_id)
+    if news.file:
+        response = FileResponse(news.file.open(), as_attachment=True)
+        response['Content-Disposition'] = f'attachment; filename="{news.file.name}"'
+        return response
+    else:
+        messages.error(request, "Файл не найден")
+        return redirect('home')
