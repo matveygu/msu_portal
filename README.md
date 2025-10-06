@@ -2,6 +2,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg?logo=python)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-5.0+-success.svg?logo=django)](https://www.djangoproject.com/)
+[![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-Active-brightgreen.svg)]()
 
 ---
@@ -151,3 +152,11 @@ python manage.py runserver
 Студент 1 курса ВМК МГУ  
 
 > 🎯 Цель проекта — сделать обучение в МГУ удобнее и современнее.
+
+---
+
+## 🧾 Лицензия
+
+Проект распространяется под лицензией [MIT](LICENSE).  
+Вы можете свободно использовать и дорабатывать код,
+только укажите в описании откуда копировали код.
