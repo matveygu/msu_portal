@@ -1,10 +1,11 @@
+import os
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.http import JsonResponse, FileResponse
 from django.utils import timezone
 from datetime import datetime, timedelta, date
-from .models import Schedule, Subject
+from .models import Schedule, Subject, Homework
 from .forms import HomeworkForm
 
 
@@ -12,10 +13,18 @@ def is_headman_or_above(user):
     return user.role in ['headman', 'teacher', 'admin']
 
 
+def get_day_name_from_weekday(weekday):
+    """Convert weekday number to Russian day name"""
+    days_map = {
+        0: 'Понедельник', 1: 'Вторник', 2: 'Среда',
+        3: 'Четверг', 4: 'Пятница', 5: 'Суббота'
+    }
+    return days_map.get(weekday, 'Понедельник')
+
+
 @login_required
 def schedule_view(request):
     user_group = request.user.group
-    print(request.user.student_id)
 
     if not user_group and request.user.role != "teacher":
         context = {
@@ -42,22 +51,21 @@ def schedule_view(request):
     next_week = (current_date + timedelta(days=7)).isoformat()
 
     # Получаем день недели для текущей даты
-    days_map = {
-        0: 'Понедельник', 1: 'Вторник', 2: 'Среда',
-        3: 'Четверг', 4: 'Пятница', 5: 'Суббота'
-    }
-    current_day = days_map.get(current_date.weekday(), 'monday')
+    current_day = get_day_name_from_weekday(current_date.weekday())
     # Расписание на текущий день
     if request.user.role != "teacher":
         schedule = Schedule.objects.filter(
+            faculty=request.user.faculty,
             group=user_group,
             day=current_day
         ).order_by('lesson_number')
+        homework = Homework.objects.filter(due_date=current_date, group=user_group)
     else:
         schedule = Schedule.objects.filter(
             teacher_id=request.user.student_id,
             day=current_day
         ).order_by('lesson_number')
+        homework = Homework.objects.filter(due_date=current_date)
 
     context = {
         'schedule': schedule,
@@ -66,6 +74,8 @@ def schedule_view(request):
         'current_date_str': current_date.isoformat(),
         'previous_week': previous_week,
         'next_week': next_week,
+        'homework': homework,
+        'form': HomeworkForm(),
     }
     return render(request, 'schedule.html', context)
 
@@ -93,28 +103,30 @@ def day_schedule(request, day):
 @login_required
 @user_passes_test(is_headman_or_above)
 def add_homework(request, schedule_id):
-    schedule_item = get_object_or_404(Schedule, id=schedule_id)
-    user = request.user
-    if user.role == 'headman' and schedule_item.group != user.group:
-        messages.error(request, "Вы можете добавлять ДЗ только для своей группы")
-        return redirect('schedule')
+    """Добавление домашнего задания для конкретной пары"""
+    schedule = get_object_or_404(Schedule, id=schedule_id)
 
-    if user.role == 'teacher' and schedule_item.subject.teacher != user:
-        messages.error(request, "Вы можете добавлять ДЗ только для своих предметов")
-        return redirect('schedule')
     if request.method == 'POST':
-        form = HomeworkForm(request.POST, request.FILES, instance=schedule_item)
+        form = HomeworkForm(request.POST, request.FILES)
+        print(form.errors)
         if form.is_valid():
-            form.save()
-            messages.success(request, "Домашнее задание успешно сохранено")
-            return redirect('schedule')
+            print("Succes")
+            print(schedule.subject)
+            homework = form.save(commit=False)
+            homework.schedule = schedule
+            homework.created_by = request.user
+            homework.assigned_date = date.today()  # ⚡ автоматически ставим дату выдачи
+            homework.group = schedule.group
+            homework.subject = schedule.subject
+            homework.save()
+            return redirect('schedule_detail', schedule_id=schedule.id)
     else:
-        form = HomeworkForm(instance=schedule_item)
-    context = {
+        form = HomeworkForm()
+
+    return render(request, 'add_homework.html', {
         'form': form,
-        'schedule_item': schedule_item
-    }
-    return render(request, 'add_homework.html', context)
+        'schedule': schedule
+    })
 
 @login_required
 def download_homework_file(request, schedule_id):
@@ -155,3 +167,26 @@ def schedule_json(request, day=None):
         })
 
     return JsonResponse({'schedule': schedule_data})
+
+@login_required
+def schedule_detail(request, schedule_id):
+    schedule = get_object_or_404(Schedule, id=schedule_id)
+    homeworks = schedule.homework_assignments.all()
+    return render(request, 'schedule_detail.html', {
+        'schedule': schedule,
+        'homeworks': homeworks
+    })
+
+@login_required
+@user_passes_test(is_headman_or_above)
+def delete_homework(request, schedule_id):
+    print(schedule_id)
+    schedule = get_object_or_404(Homework, id=schedule_id)
+    print(schedule.due_date)
+    print(schedule.file)
+    if request.method == 'POST':
+        if os.path.isfile(f"media/{schedule.file}"):
+            os.remove(f"media/{schedule.file}")
+        schedule.delete()
+        messages.success(request, 'Домашка успешно удалена')
+    return redirect(f'/schedule/?date={schedule.due_date}')

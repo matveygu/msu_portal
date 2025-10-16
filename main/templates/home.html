@@ -15,8 +15,8 @@
         <div class="card mb-4">
             <div class="card-body text-center welcome-card">
                 <h2>Добро пожаловать, {{ user.first_name }}! 👋</h2>
-                <p class="text-muted">Факультет: {{ user.faculty }} | Курс: {{ user.course }} | Группа: {{ user.group.name }}</p>
-                <p class="text-muted">Сегодня: {{ today|date:"d.m.Y" }}</p>
+                <p class="text-light-muted">Факультет: {{ user.faculty }} | Курс: {{ user.course }} | Группа: {{ user.group.name }}</p>
+                <p class="text-light-muted">Сегодня: {{ today|date:"d.m.Y" }}</p>
             </div>
         </div>
 
@@ -100,43 +100,34 @@
                                     </small>
                                     {% if user.role in 'admin teacher' and user == news.author or user.role == 'admin' %}
                                     <div class="btn-group btn-group-sm">
+                                        {% if news.file %}
+                                        <div class="mt-2">
+                                        <a href="{{ news.file.url }}"
+                                           class="btn btn-sm btn-outline-primary download-btn"
+                                           target="_blank">
+                                            <i class="fas fa-file-download"></i>
+                                        </a>
+                                        </div>
+                                        {% endif %}
                                         <a href="{% url 'edit_news' news.id %}" class="btn btn-outline-secondary">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button type="button" class="btn btn-outline-danger"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#deleteNewsModal{{ news.id }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        <form method="post" action="{% url 'delete_news' news.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('Удалить это новость?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
 
-                                    <!-- Модальное окно удаления -->
-                                    <div class="modal fade" id="deleteNewsModal{{ news.id }}" tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title">Удаление новости</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                                </div>
-                                                <div class="modal-body">
-                                                    Вы уверены, что хотите удалить новость "{{ news.title }}"?
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                                                    <form method="post" action="{% url 'delete_news' news.id %}">
-                                                        {% csrf_token %}
-                                                        <button type="submit" class="btn btn-danger">Удалить</button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+
                                     {% endif %}
                                 </div>
                             </div>
-                            {% if news.image %}
+                            {% if news.file %}
                             <div class="ms-3">
-                                <img src="{{ news.image.url }}" alt="{{ news.title }}"
+                                <img src="{{ news.file.url }}" alt="{{ news.title }}"
                                      class="img-fluid rounded" style="max-width: 120px;">
                             </div>
                             {% endif %}

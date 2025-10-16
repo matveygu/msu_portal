@@ -1,11 +1,31 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from .models import News
+from django.core.exceptions import ValidationError
+import os
+
+
+ALLOWED_NEWS_EXTENSIONS = {
+    '.pdf', '.png', '.jpg', '.jpeg', '.webp', '.gif',
+    '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.txt'
+}
+
+MAX_NEWS_FILE_BYTES = 10 * 1024 * 1024  # 10 MB
 
 class NewsForm(forms.ModelForm):
+    def clean_file(self):
+        f = self.cleaned_data.get('file')
+        if not f:
+            return f
+        ext = os.path.splitext(f.name)[1].lower()
+        if ext not in ALLOWED_NEWS_EXTENSIONS:
+            raise ValidationError('Недопустимый тип файла для новости')
+        if hasattr(f, 'size') and f.size and f.size > MAX_NEWS_FILE_BYTES:
+            raise ValidationError('Файл слишком большой (лимит 10 МБ)')
+        return f
     class Meta:
         model = News
-        fields = ['title', 'content', 'category', 'image', 'is_published']
+        fields = ['title', 'content', 'category', 'file', 'is_published']
         widgets = {
             'title': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -23,7 +43,7 @@ class NewsForm(forms.ModelForm):
             'title': 'Заголовок',
             'content': 'Содержание',
             'category': 'Категория',
-            'image': 'Изображение',
+            'file': 'Файл',
             'is_published': 'Опубликовать',
         }
 

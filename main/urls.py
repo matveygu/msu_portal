@@ -11,5 +11,6 @@ urlpatterns = [
     # Новости
     path('news/add/', views.add_news, name='add_news'),
     path('news/edit/<int:news_id>/', views.edit_news, name='edit_news'),
+    path('download/<int:news_id>/', views.download_news, name='download_news'),
     path('news/delete/<int:news_id>/', views.delete_news, name='delete_news'),
 ]

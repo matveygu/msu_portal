@@ -1,68 +1,15 @@
-{% extends 'base.html' %}
-{% load static %}
-
-{% block title %}Добавить ДЗ - МГУ ВМК{% endblock %}
+{% extends "base.html" %}
 
 {% block content %}
 <div class="container mt-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h4>📝 Добавить домашнее задание</h4>
-                </div>
-                <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Предмет:</label>
-                            <p class="fw-bold">{{ schedule_item.subject.name }}</p>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Группа:</label>
-                            <p>{{ schedule_item.group.name }}</p>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">День:</label>
-                            <p>{{ schedule_item.get_day_display }}</p>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Домашнее задание:</label>
-                            {{ form.homework }}
-                            {% if form.homework.errors %}
-                            <div class="text-danger">{{ form.homework.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Файл задания:</label>
-                            {{ form.homework_file }}
-                            {% if form.homework_file.errors %}
-                            <div class="text-danger">{{ form.homework_file.errors }}</div>
-                            {% endif %}
-                            <div class="form-text">Максимальный размер: 50MB</div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Дата задания:</label>
-                            {{ form.homework_date }}
-                            {% if form.homework_date.errors %}
-                            <div class="text-danger">{{ form.homework_date.errors }}</div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">💾 Сохранить</button>
-                            <a href="{% url 'schedule' %}" class="btn btn-secondary">Отмена</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+    <h2>Добавить домашнее задание</h2>
+    <p><strong>Пара:</strong> {{ schedule.subject }} ({{ schedule.group }})</p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+        <a href="{% url 'schedule_detail' schedule.id %}" class="btn btn-secondary">Отмена</a>
+    </form>
 </div>
 {% endblock %}

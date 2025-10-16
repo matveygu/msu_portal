@@ -1,28 +1,18 @@
 from django import forms
 from .models import Homework
 
+
 class HomeworkForm(forms.ModelForm):
     class Meta:
         model = Homework
-        fields = ['content', 'file', 'assigned_date', 'due_date']
+        fields = ['content', 'file', 'due_date']  # ⚡ assigned_date не показываем пользователю
+
         widgets = {
-            'content': forms.Textarea(attrs={
-                'rows': 4,
-                'class': 'form-control',
-                'placeholder': 'Введите домашнее задание...'
-            }),
-            'assigned_date': forms.DateInput(attrs={
-                'type': 'date',
-                'class': 'form-control'
-            }),
-            'due_date': forms.DateInput(attrs={
-                'type': 'date',
-                'class': 'form-control'
-            }),
+            'content': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Введите текст задания...'}),
+            'due_date': forms.DateInput(attrs={'type': 'date'}),
         }
         labels = {
-            'content': 'Домашнее задание',
-            'file': 'Файл задания',
-            'assigned_date': 'Дата задания',
-            'due_date': 'Срок сдачи'
+            'content': 'Текст задания',
+            'file': 'Файл (необязательно)',
+            'due_date': 'Срок сдачи',
         }

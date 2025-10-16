@@ -1,5 +1,6 @@
 import json
 import os
+from django.http import FileResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -15,6 +16,15 @@ from schedule.models import Schedule
 
 def is_teacher_or_above(user):
     return user.role in ['teacher', 'admin']
+
+
+def get_day_name_from_weekday(weekday):
+    """Convert weekday number to Russian day name"""
+    days_map = {
+        0: 'Понедельник', 1: 'Вторник', 2: 'Среда',
+        3: 'Четверг', 4: 'Пятница', 5: 'Суббота'
+    }
+    return days_map.get(weekday, 'Понедельник')
 
 
 def load_faculties_from_json():
@@ -61,7 +71,7 @@ def get_default_faculties():
             'website': 'https://cs.msu.ru',
             'contact': 'vmk@cs.msu.ru',
             'phone': '+7 (495) 939-54-01',
-            'local_logo': 'data/faculties/vmk.png'
+            'local_logo': 'data/faculties/1.png'
         }
     ]
 
@@ -71,15 +81,10 @@ def home(request):
         # Получаем расписание на сегодня для текущего пользователя
         today_schedule = []
         if hasattr(request.user, 'group') and request.user.group:
-            # Получаем день недели для сегодня
-            days_map = {
-                0: 'monday', 1: 'tuesday', 2: 'wednesday',
-                3: 'thursday', 4: 'friday', 5: 'saturday'
-            }
-            today = date.today()
-            today_day = days_map.get(today.weekday(), 'monday')
-
             # Получаем расписание на сегодня
+            today = date.today()
+            today_day = get_day_name_from_weekday(today.weekday())
+            
             today_schedule = Schedule.objects.filter(
                 group=request.user.group,
                 day=today_day
@@ -145,10 +150,16 @@ def add_news(request):
 def edit_news(request, news_id):
     """Редактирование новости"""
     news = get_object_or_404(News, id=news_id)
-
+    file = news.file
     if request.method == 'POST':
         form = NewsForm(request.POST, request.FILES, instance=news)
         if form.is_valid():
+            # Delete old file from storage if a new file is uploaded
+            if 'file' in form.changed_data and file:
+                try:
+                    file.storage.delete(file.name)
+                except Exception:
+                    pass
             form.save()
             messages.success(request, 'Новость успешно обновлена')
             return redirect('home')
@@ -164,6 +175,27 @@ def delete_news(request, news_id):
     """Удаление новости"""
     news = get_object_or_404(News, id=news_id)
     if request.method == 'POST':
+        # Remove associated file via storage first
+        if news.file:
+            try:
+                news.file.storage.delete(news.file.name)
+            except Exception:
+                pass
         news.delete()
         messages.success(request, 'Новость успешно удалена')
     return redirect('home')
+
+@login_required
+def download_news(request, news_id):
+    news = get_object_or_404(News, id=news_id)
+    if news.file:
+        filename = os.path.basename(news.file.name)
+        response = FileResponse(news.file.open(), as_attachment=True)
+        # RFC 5987 filename* for unicode, plus safe fallback
+        response['Content-Disposition'] = (
+            f"attachment; filename=\"{filename}\"; filename*=UTF-8''{filename}"
+        )
+        return response
+    else:
+        messages.error(request, "Файл не найден")
+        return redirect('home')
